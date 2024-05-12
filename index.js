@@ -1,6 +1,9 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const app = express()
 const port = 3001
+
+app.use(bodyParser);
 
 const USERS = [];
 
@@ -23,8 +26,8 @@ app.post('/signup', function(req, res) {
   var data = req.body
 
   // Ensure that email and password are provided in the request body
-  if (!data.email || !data.password) {
-    return res.status(400).json({ error: 'Bad Request', message: 'Email and password are required fields.' });
+  if (!data.email || !data.name || !data.password) {
+    return res.status(400).json({ error: 'Bad Request', message: 'Email, name, and password are required fields.' });
   }
 
   // Extract email, name, and password using object destructuring
@@ -46,17 +49,28 @@ app.post('/signup', function(req, res) {
 app.post('/login', function(req, res) {
   // Add logic to decode body
   // body should have email and password
+  var data = req.body;
+
+  var {email, password} =data;
+
 
   // Check if the user with the given email exists in the USERS array
   // Also ensure that the password is the same
-
-
-  // If the password is the same, return back 200 status code to the client
-  // Also send back a token (any random string will do for now)
-  // If the password is not the same, return back 401 status code to the client
-
-
-  res.send('Hello World from route 2!')
+  const user  = USERS.find(USERS => USERS.Email === email);
+  
+  if (user) {
+    if (user.Password === password) {
+      // If the password is correct, return back 200 status code to the client
+      // Also send back a token (any random string will do for now)
+      return res.status(200).json({ message: 'Login successful', token: 'randomToken' });
+    } else {
+      // If the password is incorrect, return back 401 status code to the client
+      return res.status(401).json({ error: 'Unauthorized', message: 'Invalid email or password' });
+    }
+  } else {
+    // If the user doesn't exist, return back 404 status code to the client
+    return res.status(404).json({ error: 'Not Found', message: 'User not found' });
+  }
 })
 
 app.get('/questions', function(req, res) {
