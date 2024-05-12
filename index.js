@@ -20,14 +20,27 @@ const SUBMISSION = [
 
 app.post('/signup', function(req, res) {
   // Add logic to decode body
-  // body should have email and password
+  var data = req.body
 
+  // Ensure that email and password are provided in the request body
+  if (!data.email || !data.password) {
+    return res.status(400).json({ error: 'Bad Request', message: 'Email and password are required fields.' });
+  }
 
-  //Store email and password (as is for now) in the USERS array above (only if the user with the given email doesnt exist)
+  // Extract email, name, and password using object destructuring
+  var { email, name, password } = data;
 
-
-  // return back 200 status code to the client
-  res.send('Hello World!')
+   // Store email and password in the USERS array only if the user with the given email doesn't exis
+  if (USERS.find(user => user.Email === email)) {
+    return res.status(409).json({ error: 'User already exists', message: 'A user with the provided email already exists.' });
+  } else {
+    USERS.push({
+      Name: name,
+      Email: email,
+      Password: password
+    });
+    return res.status(200).json({ message: 'User registered successfully', user: { Name: name, Email: email } });
+  }
 })
 
 app.post('/login', function(req, res) {
